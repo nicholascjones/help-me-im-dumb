@@ -4,8 +4,9 @@
 import argparse
 import datetime
 import json
-import praw
+import logging
 import os
+import praw
 
 SUBREDDIT = 'explainlikeimfive'
 MAX_COMMENTS = 10
@@ -69,16 +70,25 @@ def save_past_posts_to_file(filename=None, days=10):
             if submission.id in current_posts:
                 continue
             comments = get_comments(submission, limit=MAX_COMMENTS)
+            date = datetime.datetime.fromtimestamp(
+                submission.created
+            ).strftime('%c')
+            title = submission.title
             post = {
-                'date': datetime.datetime.fromtimestamp(
-                    submission.created
-                ).strftime('%c'),
-                'title': submission.title,
+                'date': date,
+                'title': title,
                 'body': submission.selftext,
                 'post_id': submission.id,
                 'comments': comments,
+                'subreddit': submission.subreddit.name,
+                'url': submission.url,
             }
-            print post
+            logging.info("title: {}; date: {}".format(
+                    title.encode('utf-8'),
+                    date
+                )
+            )
+            logging.debug(post)
             f.write(json.dumps(post) + '\n')
 
 
@@ -108,6 +118,11 @@ def parse_args():
         help='# of comments to save per post',
         type=int,
     )
+    parser.add_argument(
+        '-v',
+        action='store_true',
+        help='INFO debugging',
+    )
 
     return parser.parse_args()
 
@@ -115,7 +130,10 @@ def parse_args():
 def main():
     global SUBREDDIT
     global MAX_COMMENTS
+    logging.basicConfig(level=logging.INFO)
     args = parse_args()
+    if args.v:
+        logging.basicConfig(level=logging.DEBUG)
     SUBREDDIT = args.subreddit
     days = args.days
     f = args.file
