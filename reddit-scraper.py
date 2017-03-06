@@ -1,13 +1,14 @@
 #!/usr/bin/python2
 # reddit-scraper.py
 
+import argparse
 import datetime
 import json
 import praw
 import os
 
 SUBREDDIT = 'explainlikeimfive'
-DAYS_SINCE_NOW = 1
+MAX_COMMENTS = 10
 
 
 def get_reddit_instance():
@@ -21,7 +22,7 @@ def get_reddit_instance():
 
 def get_starting_timestamp(days):
     starting_timestamp = (datetime.datetime.now() - datetime.timedelta(
-        days=DAYS_SINCE_NOW,
+        days=days,
     )).strftime("%s")
     return starting_timestamp
 
@@ -36,7 +37,7 @@ def get_current_posts_from_file(filename):
     return post_ids
 
 
-def get_comments(submission, limit=5):
+def get_comments(submission, limit=MAX_COMMENTS):
     comments = []
     for c in submission.comments:
         if len(comments) > limit:
@@ -67,7 +68,7 @@ def save_past_posts_to_file(filename=None, days=10):
         ):
             if submission.id in current_posts:
                 continue
-            comments = get_comments(submission, limit=10)
+            comments = get_comments(submission, limit=MAX_COMMENTS)
             post = {
                 'date': datetime.datetime.fromtimestamp(
                     submission.created
@@ -80,4 +81,46 @@ def save_past_posts_to_file(filename=None, days=10):
             print post
             f.write(json.dumps(post) + '\n')
 
-save_past_posts_to_file('posts.jsonl', 1)
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Scraps reddit data into file'
+    )
+    parser.add_argument(
+        'file',
+        help='file to save data',
+    )
+    parser.add_argument(
+        '--subreddit',
+        type=str,
+        help='subreddit to scrape',
+        required=True
+    )
+    parser.add_argument(
+        '--days',
+        type=int,
+        help='how many days in past to search',
+        required=True,
+    )
+    parser.add_argument(
+        '--max-comments',
+        default=10,
+        help='# of comments to save per post',
+        type=int,
+    )
+
+    return parser.parse_args()
+
+
+def main():
+    global SUBREDDIT
+    global MAX_COMMENTS
+    args = parse_args()
+    SUBREDDIT = args.subreddit
+    days = args.days
+    f = args.file
+    MAX_COMMENTS = args.max_comments
+    save_past_posts_to_file(f, days)
+
+
+main()
