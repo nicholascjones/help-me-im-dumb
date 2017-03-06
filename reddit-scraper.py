@@ -21,7 +21,7 @@ def get_reddit_instance():
     return reddit
 
 
-def get_starting_timestamp(days):
+def get_timestamp_for_days_from_now(days):
     starting_timestamp = (datetime.datetime.now() - datetime.timedelta(
         days=days,
     )).strftime("%s")
@@ -55,17 +55,19 @@ def get_comments(submission, limit=MAX_COMMENTS):
     return comments
 
 
-def save_past_posts_to_file(filename=None, days=10):
+def save_past_posts_to_file(filename=None, start_days=10, end_days=None):
     if not filename:
         raise RuntimeError("No filename given")
 
     reddit = get_reddit_instance()
-    starting_timestamp = get_starting_timestamp(days)
+    starting_timestamp = get_timestamp_for_days_from_now(start_days)
+    ending_timestamp = get_timestamp_for_days_from_now(end_days)
     current_posts = get_current_posts_from_file(filename)
 
     with open(filename, 'a') as f:
         for submission in reddit.subreddit(SUBREDDIT).submissions(
-                start=starting_timestamp
+                start=starting_timestamp,
+                end=ending_timestamp,
         ):
             if submission.id in current_posts:
                 continue
@@ -107,10 +109,16 @@ def parse_args():
         required=True
     )
     parser.add_argument(
-        '--days',
+        '--start-days',
         type=int,
-        help='how many days in past to search',
+        help='how many days in past to begin',
         required=True,
+    )
+    parser.add_argument(
+        '--end-days',
+        type=int,
+        help='how many days in past to end',
+        required=False,
     )
     parser.add_argument(
         '--max-comments',
@@ -135,10 +143,11 @@ def main():
     if args.v:
         logging.basicConfig(level=logging.DEBUG)
     SUBREDDIT = args.subreddit
-    days = args.days
+    start_days = args.start_days
+    end_days = args.end_days
     f = args.file
     MAX_COMMENTS = args.max_comments
-    save_past_posts_to_file(f, days)
+    save_past_posts_to_file(f, start_days=start_days, end_days=end_days)
 
 
 main()
