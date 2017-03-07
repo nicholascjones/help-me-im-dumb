@@ -5,7 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/data.json "0.2.6"]
-                 [compojure "1.5.2"]]
+                 [compojure "1.5.2"]
+                 [hiccup "1.0.0"]]
   :main ^:skip-aot help-me-im-dumb.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
