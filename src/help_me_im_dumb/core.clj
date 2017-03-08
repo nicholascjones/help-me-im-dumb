@@ -1,5 +1,7 @@
 (ns help-me-im-dumb.core
-  (:require [help-me-im-dumb.index :as index])
+  (:require [help-me-im-dumb.index :as index]
+            [compojure.core :refer :all]
+            [compojure.route :as route])
   (:gen-class))
 
 (defn usage
