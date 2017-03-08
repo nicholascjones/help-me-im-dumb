@@ -16,6 +16,6 @@
     (nil? args) (usage)
     (= "-index" (first args))
     (do
-      (index/create-indicies (first args))
+      (index/create-indicies (second args))
       (println "Index created successfully!"))
     :else (usage)))
