@@ -1,36 +1,14 @@
 # help-me-im-dumb
 
-FIXME: description
+Search engine for eli5 and various other soruces
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Install [Leiningen](https://leiningen.org/)
 
 ## Usage
+The indices must be created from a jsonfile (created from `reddit-scraper.py`)
+before the search engine can run. After being created once, the server can be run.
 
-FIXME: explanation
-
-    $ java -jar help-me-im-dumb-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2017 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+    $ lein run -index jsonfile.jsonl # runs index on line separated json file
+    $ lein run -server 5000 # starts web server on port 5000
