@@ -14,8 +14,8 @@
         comments (doc "comments")
         comment-string (concat (map #(get % "text") comments))]
     (->
-     (clojure.string/replace #"[,!'.%?]" "")
      (apply str body comment-string)
+     (clojure.string/replace #"[,!'.%?\"\(\)]" "")
      (clojure.string/split #"\s+"))))
 
 (defn token-seq-from-file
