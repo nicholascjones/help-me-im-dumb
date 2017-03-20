@@ -6,16 +6,20 @@
 (def DICTIONARY-FILENAME "resources/dictionary.txt")
 (def POSTINGS-LIST-FILENAME "resources/postings.txt")
 
-(declare token-seq-from-file create-sorted-term-postings-mapping write-term-postings-mapping-to-files)
+(declare token-seq-from-file create-sorted-term-postings-mapping write-term-postings-mapping-to-files read-in-dictionary)
 
-
-(defn read-in-dictionary
+(defn initialize-index
   []
-  (into {} (map #(s/split % #"\t") (line-seq (io/reader DICTIONARY-FILENAME)))))
+  (def DICTIONARY (read-in-dictionary)))
 
-(read-in-dictionary)
-
-(create-indicies "resources/test-index")
+(defn term->postings
+  [term]
+  (-> (some
+       #(when (.startsWith % term) %)
+       (line-seq (io/reader POSTINGS-LIST-FILENAME)))
+      (s/split #"\t")
+      second
+      (s/split #";")))
 
 (defn create-indicies
   "Main function for creating indicies. 
@@ -24,6 +28,10 @@
   (->> (token-seq-from-file jsonfile)
        create-sorted-term-postings-mapping
        write-term-postings-mapping-to-files))
+
+(defn read-in-dictionary
+  []
+  (into {} (map #(s/split % #"\t") (line-seq (io/reader DICTIONARY-FILENAME)))))
 
 (defn normalize-tokens
   [tokens]
