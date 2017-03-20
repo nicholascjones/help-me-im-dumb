@@ -35,6 +35,6 @@ function run_query(q) {
 }
 
 var query_field = document.getElementById('query-field');
-query_field.onchange = function(e) {
+query_field.oninput = function(e) {
     run_query(e.target.value);
 }
