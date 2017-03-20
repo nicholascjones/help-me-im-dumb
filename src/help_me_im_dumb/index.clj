@@ -21,7 +21,7 @@
 (defn docid->url
   [docid]
   (-> (some
-       #(when (.startsWith % docid) %)
+       #(when (.startsWith % (str docid)) %)
        (line-seq (io/reader URL-MAPPING-FILENAME)))
       (s/split #"\t")
       second))
@@ -32,8 +32,7 @@
                 (let [postings-map (spicerack/open-hashmap db POSTINGS-LIST-DB)]
                   (get postings-map term)))]
     (if (some? plist)
-      (-> plist
-          (s/split #";"))
+      plist
       '())))
 
 (defn create-indicies
@@ -123,7 +122,7 @@
                 (str term "\t" (count (distinct postings)) "\n"))
         (spicerack/put!
          postings-list-map
-         term (clojure.string/join ";" postings))))))
+         term postings)))))
 
 (defn write-url-mapping-to-file
   [url-seq]
