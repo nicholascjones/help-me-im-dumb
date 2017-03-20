@@ -7,12 +7,14 @@
             [clojure.data.json :as json]
             [help-me-im-dumb.query-engine :as query]))
 
+(def RESULTS-LIMIT 10)
+
 (defn read-template [filename]
   (io/resource filename))
 
 (defn boolean-query-results
   [q]
-  (json/write-str (query/bquery->results q)))
+  (json/write-str (query/bquery->results q RESULTS-LIMIT)))
 
 (defroutes app-routes
   (route/resources "/")
@@ -29,4 +31,3 @@
   (jetty/run-jetty #'app {:port port :join? false}))
 
 ;; (def server (run-server 5000))
-

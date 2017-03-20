@@ -23,7 +23,7 @@ function run_query(q) {
         links = JSON.parse(data);
         tags = [];
         result_list.innerHTML = ''
-        for (var i = 0; i < links.length && i < 10; i++) {
+        for (var i = 0; i < links.length; i++) {
             var tag = create_link_list_item(links[i]);
             result_list.appendChild(tag);
         }

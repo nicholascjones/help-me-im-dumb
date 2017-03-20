@@ -4,9 +4,8 @@
 (declare boolean-query-matcher)
 
 (defn query->results
-  [matcher q]
-  (map index/docid->url (matcher q)))
-
+  [matcher q limit]
+  (map index/docid->url (take limit (matcher q))))
 
 (defn boolean-query-matcher
   "Super dumb query matcher. Returns all docs with all words"
