@@ -15,6 +15,7 @@
   (json/write-str (query/bquery->results q)))
 
 (defroutes app-routes
+  (route/resources "/")
   (GET "/" [] (read-template "templates/index.html"))
   (GET "/query/:q" [q] (boolean-query-results q))
   (route/not-found "Not Found"))
@@ -28,3 +29,4 @@
   (jetty/run-jetty #'app {:port port :join? false}))
 
 ;; (def server (run-server 5000))
+
