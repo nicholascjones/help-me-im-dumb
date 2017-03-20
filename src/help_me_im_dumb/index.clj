@@ -116,9 +116,7 @@
       (doseq [[term postings] term-postings-mapping]
         (.write dictionary-file
                 (str term "\t" (count (distinct postings)) "\n"))
-        (spicerack/put!
-         postings-list-map
-         term postings)))))
+        (spicerack/put! postings-list-map term postings)))))
 
 (defn write-url-mapping-to-file
   [url-seq]
