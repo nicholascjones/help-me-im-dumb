@@ -5,6 +5,16 @@
 (def DICTIONARY-FILENAME "resources/dictionary.txt")
 (def POSTINGS-LIST-FILENAME "resources/postings.txt")
 
+(declare token-seq-from-file create-sorted-term-postings-mapping write-term-postings-mapping-to-files)
+
+(defn create-indicies
+  "Main function for creating indicies. 
+   Reads in datafile, tokenizes, sorts, and writes to files"
+  [jsonfile]
+  (->> (token-seq-from-file jsonfile)
+       create-sorted-term-postings-mapping
+       write-term-postings-mapping-to-files))
+
 (defn get-tokens-from-doc
   "Takes reddit doc from json data"
   [doc]
@@ -53,6 +63,10 @@
    id-token-pairs))
 
 (defn write-term-postings-mapping-to-files
+  "Writes term and postings list to index files
+  
+  Dictionary file: term\tdocument_frequency
+  Postings list file: term\tpost1;post2;"
   [term-postings-mapping]
   (with-open [dictionary-file (io/writer DICTIONARY-FILENAME)
               postings-list-file (io/writer POSTINGS-LIST-FILENAME)]
@@ -62,10 +76,4 @@
       (.write postings-list-file
               (str term "\t" (clojure.string/join ";" postings) "\n")))))
 
-(defn create-indicies
-  "Main function for creating indicies. 
-   Reads in datafile, tokenizes, sorts, and writes to files"
-  [jsonfile]
-  (->> (token-seq-from-file jsonfile)
-       create-sorted-term-postings-mapping
-       write-term-postings-mapping-to-files))
+
