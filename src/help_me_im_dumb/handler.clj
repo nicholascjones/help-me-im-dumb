@@ -5,7 +5,8 @@
             [ring.adapter.jetty :as jetty]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
-            [help-me-im-dumb.query-engine :as query]))
+            [help-me-im-dumb.query-engine :as query]
+            [help-me-im-dumb.index :as index]))
 
 (def RESULTS-LIMIT 30)
 
@@ -28,6 +29,8 @@
 (defn run-server
   "Runs jetty server on given port"
   [port]
+  (index/initialize-index)
   (jetty/run-jetty #'app {:port port :join? false}))
 
 ;; (def server (run-server 5000))
+

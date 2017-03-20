@@ -16,19 +16,18 @@
 
 (defn initialize-index
   []
-  (def DICTIONARY (read-in-dictionary)))
+  (def DICTIONARY (read-in-dictionary))
+  (def MAPDB (spicerack/open-database MAPDB-FILENAME)))
 
 (defn docid->url
   [docid]
-  (with-open [db (spicerack/open-database MAPDB-FILENAME)]
-    (let [url-map (spicerack/open-hashmap db URL-MAPPING-DB)]
-      (get url-map docid))))
+  (let [url-map (spicerack/open-hashmap MAPDB URL-MAPPING-DB)]
+    (get url-map docid)))
 
 (defn term->postings
   [term]
-  (let [plist (with-open [db (spicerack/open-database MAPDB-FILENAME)]
-                (let [postings-map (spicerack/open-hashmap db POSTINGS-LIST-DB)]
-                  (get postings-map term)))]
+  (let [plist (let [postings-map (spicerack/open-hashmap MAPDB POSTINGS-LIST-DB)]
+                (get postings-map term))]
     (if (some? plist)
       plist
       '())))
@@ -112,9 +111,8 @@
   Dictionary file: term\tdocument_frequency
   Postings list file: term\tpost1;post2;"
   [term-postings-mapping]
-  (with-open [dictionary-file (io/writer DICTIONARY-FILENAME)
-              db (spicerack/open-database MAPDB-FILENAME)]
-    (let [postings-list-map (spicerack/open-hashmap db POSTINGS-LIST-DB)]
+  (with-open [dictionary-file (io/writer DICTIONARY-FILENAME)]
+    (let [postings-list-map (spicerack/open-hashmap MAPDB POSTINGS-LIST-DB)]
       (doseq [[term postings] term-postings-mapping]
         (.write dictionary-file
                 (str term "\t" (count (distinct postings)) "\n"))
@@ -124,10 +122,9 @@
 
 (defn write-url-mapping-to-file
   [url-seq]
-  (with-open [db (spicerack/open-database MAPDB-FILENAME)]
-    (let [url-map (spicerack/open-hashmap db URL-MAPPING-DB)]
-      (doseq [[doc-id url] url-seq]
-        (spicerack/put! url-map doc-id url)))))
+  (let [url-map (spicerack/open-hashmap MAPDB URL-MAPPING-DB)]
+    (doseq [[doc-id url] url-seq]
+      (spicerack/put! url-map doc-id url))))
 
 (defn create-url-seq
   [doc-seq]
