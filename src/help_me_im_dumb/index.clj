@@ -4,7 +4,6 @@
             [clojure.string :as s]
             [spicerack.core :as spicerack]))
 
-
 (def DICTIONARY-FILENAME "resources/dictionary.txt")
 (def POSTINGS-LIST-FILENAME "resources/postings.txt")
 (def MAPDB-FILENAME "resources/mapdb.db")
@@ -111,8 +110,9 @@
   Dictionary file: term\tdocument_frequency
   Postings list file: term\tpost1;post2;"
   [term-postings-mapping]
-  (with-open [dictionary-file (io/writer DICTIONARY-FILENAME)]
-    (let [postings-list-map (spicerack/open-hashmap MAPDB POSTINGS-LIST-DB)]
+  (with-open [dictionary-file (io/writer DICTIONARY-FILENAME)
+              db (spicerack/open-database MAPDB-FILENAME)]
+    (let [postings-list-map (spicerack/open-hashmap db POSTINGS-LIST-DB)]
       (doseq [[term postings] term-postings-mapping]
         (.write dictionary-file
                 (str term "\t" (count (distinct postings)) "\n"))
@@ -120,9 +120,10 @@
 
 (defn write-url-mapping-to-file
   [url-seq]
-  (let [url-map (spicerack/open-hashmap MAPDB URL-MAPPING-DB)]
-    (doseq [[doc-id url] url-seq]
-      (spicerack/put! url-map doc-id url))))
+  (with-open [db (spicerack/open-database MAPDB-FILENAME)]
+    (let [url-map (spicerack/open-hashmap db URL-MAPPING-DB)]
+     (doseq [[doc-id url] url-seq]
+       (spicerack/put! url-map doc-id url)))))
 
 (defn create-url-seq
   [doc-seq]
@@ -132,6 +133,7 @@
   "Main function for creating indicies.
    Reads in datafile, tokenizes, sorts, and writes to files"
   [jsonfile]
+  (io/delete-file MAPDB-FILENAME)
   (let [docs (doc-seq-from-file jsonfile)
         token-seq (token-seq-from-docs docs)
         url-seq (create-url-seq docs)]
