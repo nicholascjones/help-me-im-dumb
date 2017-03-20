@@ -5,12 +5,21 @@
 
 (def DICTIONARY-FILENAME "resources/dictionary.txt")
 (def POSTINGS-LIST-FILENAME "resources/postings.txt")
+(def URL-MAPPING-FILENAME "resources/url-mapping.txt")
 
-(declare token-seq-from-file create-sorted-term-postings-mapping write-term-postings-mapping-to-files read-in-dictionary)
+(declare create-indicies-helper read-in-dictionary)
 
 (defn initialize-index
   []
   (def DICTIONARY (read-in-dictionary)))
+
+(defn docid->url
+  [docid]
+  (-> (some
+       #(when (.startsWith % docid) %)
+       (line-seq (io/reader URL-MAPPING-FILENAME)))
+      (s/split #"\t")
+      second))
 
 (defn term->postings
   [term]
@@ -25,9 +34,7 @@
   "Main function for creating indicies. 
    Reads in datafile, tokenizes, sorts, and writes to files"
   [jsonfile]
-  (->> (token-seq-from-file jsonfile)
-       create-sorted-term-postings-mapping
-       write-term-postings-mapping-to-files))
+  (create-indicies-helper jsonfile))
 
 (defn read-in-dictionary
   []
@@ -37,6 +44,13 @@
   [tokens]
   (map s/lower-case tokens))
 
+(defn sanitize-tokens
+  [tokens]
+  (-> tokens
+      (clojure.string/replace #"[^a-zA-Z\s]" "")
+      (clojure.string/split #"\s+")
+      normalize-tokens))
+
 (defn get-tokens-from-doc
   "Takes reddit doc from json data"
   [doc]
@@ -45,22 +59,26 @@
         url (doc "url")
         comments (doc "comments")
         comment-string (concat (map #(get % "text") comments))]
-    (->
-     (apply str body " " comment-string)
-     (clojure.string/replace #"[^a-zA-Z\s]" "")
-     (clojure.string/split #"\s+")
-     normalize-tokens)))
+    {:url url :text (sanitize-tokens (apply str body " " comment-string))}))
 
-(defn token-seq-from-file
-  "Returns [docid token] lazy seq from file"
+(defn doc-seq-from-file
+  "Returns doc lazy seq from file"
   [json-datafile]
+  (map
+   (fn [line id]
+     (assoc (get-tokens-from-doc (json/read-str line)) :id id))
+   (line-seq (io/reader json-datafile))
+   (iterate inc 0)))
+
+(defn token-seq-from-docs
+  "Returns [id term] from doc-seq"
+  [doc-seq]
   (apply
    concat
    (map
-    (fn [line id]
-      (map #(vector id %) (get-tokens-from-doc (json/read-str line))))
-    (line-seq (io/reader json-datafile))
-    (iterate inc 0))))
+    (fn [{id :id tokens :text}]
+      (map #(vector id %) tokens))
+    doc-seq)))
 
 (defn sort-id-token-pairs
   "Sorts id token pairs
@@ -99,4 +117,25 @@
       (.write postings-list-file
               (str term "\t" (clojure.string/join ";" postings) "\n")))))
 
+(defn write-url-mapping-to-file
+  [url-seq]
+  (with-open [url-mapping-file (io/writer URL-MAPPING-FILENAME)]
+    (doseq [[doc-id url] url-seq]
+      (.write url-mapping-file
+              (str doc-id "\t" url "\n")))))
 
+(defn create-url-seq
+  [doc-seq]
+  (map (fn [{id :id url :url}] [id url]) doc-seq))
+
+(defn create-indicies-helper
+  "Main function for creating indicies. 
+   Reads in datafile, tokenizes, sorts, and writes to files"
+  [jsonfile]
+  (let [docs (doc-seq-from-file jsonfile)
+        token-seq (token-seq-from-docs docs)
+        url-seq (create-url-seq docs)]
+    (-> token-seq ;; Write term postings to file
+        create-sorted-term-postings-mapping
+        write-term-postings-mapping-to-files)
+    (write-url-mapping-to-file url-seq)))
