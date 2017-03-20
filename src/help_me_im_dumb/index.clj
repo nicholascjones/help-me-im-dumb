@@ -20,11 +20,9 @@
 
 (defn docid->url
   [docid]
-  (-> (some
-       #(when (.startsWith % (str docid)) %)
-       (line-seq (io/reader URL-MAPPING-FILENAME)))
-      (s/split #"\t")
-      second))
+  (with-open [db (spicerack/open-database MAPDB-FILENAME)]
+    (let [url-map (spicerack/open-hashmap db URL-MAPPING-DB)]
+      (get url-map docid))))
 
 (defn term->postings
   [term]
