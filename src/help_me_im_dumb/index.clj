@@ -1,11 +1,21 @@
 (ns help-me-im-dumb.index
   (:require [clojure.java.io :as io]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clojure.string :as s]))
 
 (def DICTIONARY-FILENAME "resources/dictionary.txt")
 (def POSTINGS-LIST-FILENAME "resources/postings.txt")
 
 (declare token-seq-from-file create-sorted-term-postings-mapping write-term-postings-mapping-to-files)
+
+
+(defn read-in-dictionary
+  []
+  (into {} (map #(s/split % #"\t") (line-seq (io/reader DICTIONARY-FILENAME)))))
+
+(read-in-dictionary)
+
+(create-indicies "resources/test-index")
 
 (defn create-indicies
   "Main function for creating indicies. 
@@ -14,6 +24,10 @@
   (->> (token-seq-from-file jsonfile)
        create-sorted-term-postings-mapping
        write-term-postings-mapping-to-files))
+
+(defn normalize-tokens
+  [tokens]
+  (map s/lower-case tokens))
 
 (defn get-tokens-from-doc
   "Takes reddit doc from json data"
@@ -24,9 +38,10 @@
         comments (doc "comments")
         comment-string (concat (map #(get % "text") comments))]
     (->
-     (apply str body url comment-string)
+     (apply str body " " comment-string)
      (clojure.string/replace #"[^a-zA-Z\s]" "")
-     (clojure.string/split #"\s+"))))
+     (clojure.string/split #"\s+")
+     normalize-tokens)))
 
 (defn token-seq-from-file
   "Returns [docid token] lazy seq from file"
