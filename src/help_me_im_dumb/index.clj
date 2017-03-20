@@ -1,11 +1,16 @@
 (ns help-me-im-dumb.index
   (:require [clojure.java.io :as io]
             [clojure.data.json :as json]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [spicerack.core :as spicerack]))
+
 
 (def DICTIONARY-FILENAME "resources/dictionary.txt")
 (def POSTINGS-LIST-FILENAME "resources/postings.txt")
+(def MAPDB-FILENAME "resources/mapdb.db")
+(def POSTINGS-LIST-DB "term-postings-mapping")
 (def URL-MAPPING-FILENAME "resources/url-mapping.txt")
+(def URL-MAPPING-DB "url-mapping")
 
 (declare create-indicies-helper read-in-dictionary)
 
@@ -23,13 +28,11 @@
 
 (defn term->postings
   [term]
-  (let [plist (some
-               #(when (.startsWith % term) %)
-               (line-seq (io/reader POSTINGS-LIST-FILENAME)))]
+  (let [plist (with-open [db (spicerack/open-database MAPDB-FILENAME)]
+                (let [postings-map (spicerack/open-hashmap db POSTINGS-LIST-DB)]
+                  (get postings-map term)))]
     (if (some? plist)
       (-> plist
-          (s/split #"\t")
-          second
           (s/split #";"))
       '())))
 
@@ -113,19 +116,21 @@
   Postings list file: term\tpost1;post2;"
   [term-postings-mapping]
   (with-open [dictionary-file (io/writer DICTIONARY-FILENAME)
-              postings-list-file (io/writer POSTINGS-LIST-FILENAME)]
-    (doseq [[term postings] term-postings-mapping]
-      (.write dictionary-file
-              (str term "\t" (count (distinct postings)) "\n"))
-      (.write postings-list-file
-              (str term "\t" (clojure.string/join ";" postings) "\n")))))
+              db (spicerack/open-database MAPDB-FILENAME)]
+    (let [postings-list-map (spicerack/open-hashmap db POSTINGS-LIST-DB)]
+      (doseq [[term postings] term-postings-mapping]
+        (.write dictionary-file
+                (str term "\t" (count (distinct postings)) "\n"))
+        (spicerack/put!
+         postings-list-map
+         term (clojure.string/join ";" postings))))))
 
 (defn write-url-mapping-to-file
   [url-seq]
-  (with-open [url-mapping-file (io/writer URL-MAPPING-FILENAME)]
-    (doseq [[doc-id url] url-seq]
-      (.write url-mapping-file
-              (str doc-id "\t" url "\n")))))
+  (with-open [db (spicerack/open-database MAPDB-FILENAME)]
+    (let [url-map (spicerack/open-hashmap db URL-MAPPING-DB)]
+      (doseq [[doc-id url] url-seq]
+        (spicerack/put! url-map doc-id url)))))
 
 (defn create-url-seq
   [doc-seq]

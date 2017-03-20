@@ -18,6 +18,7 @@ function create_link_list_item(link) {
 }
 
 function run_query(q) {
+    console.log('Running query for ' + q);
     http_get('/query/' + q, function(data) {
         var result_list = document.getElementById("result-list");
         var results_count = document.getElementById("results-count");
@@ -29,6 +30,7 @@ function run_query(q) {
             var tag = create_link_list_item(links[i]);
             result_list.appendChild(tag);
         }
+        console.log('Query for ' + q + 'returned.');
     });
 }
 

@@ -8,7 +8,8 @@
                  [compojure "1.5.2"]
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-jetty-adapter "1.5.1"]
-                 [hiccup "1.0.5"]]
+                 [hiccup "1.0.5"]
+                 [spicerack "0.1.2"]]
   :plugins [[lein-ring "0.9.7"]]
   :ring {:handler help-me-im-dumb.handler/app}
   :main ^:skip-aot help-me-im-dumb.core
