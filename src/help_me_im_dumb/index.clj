@@ -59,8 +59,7 @@
         url (doc "url")
         comments (doc "comments")
         comment-string (concat (map #(get % "text") comments))]
-    {:url url :text (sanitize-tokens (apply str body " " comment-string))}))
-
+    {:url url :title (sanitize-tokens title) :text (sanitize-tokens (apply str body " " comment-string))}))
 
 (defn doc-seq-from-file
   "Returns doc lazy seq from file"
@@ -77,7 +76,7 @@
   (apply
    concat
    (map
-    (fn [{id :id tokens :text}]
+    (fn [{id :id tokens :title}]
       (map #(vector id %) tokens))
     doc-seq)))
 
