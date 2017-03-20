@@ -7,7 +7,7 @@
             [clojure.data.json :as json]
             [help-me-im-dumb.query-engine :as query]))
 
-(def RESULTS-LIMIT 10)
+(def RESULTS-LIMIT 30)
 
 (defn read-template [filename]
   (io/resource filename))
