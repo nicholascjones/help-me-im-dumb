@@ -7,6 +7,8 @@
   [matcher q]
   (map index/docid->url (matcher q)))
 
+(def bquery->results (partial query->results boolean-query-matcher))
+
 (defn boolean-query-matcher
   "Super dumb query matcher. Returns all docs with all words"
   [q]
