@@ -31,7 +31,7 @@
       (s/split #";")))
 
 (defn create-indicies
-  "Main function for creating indicies. 
+  "Main function for creating indicies.
    Reads in datafile, tokenizes, sorts, and writes to files"
   [jsonfile]
   (create-indicies-helper jsonfile))
@@ -60,6 +60,7 @@
         comments (doc "comments")
         comment-string (concat (map #(get % "text") comments))]
     {:url url :text (sanitize-tokens (apply str body " " comment-string))}))
+
 
 (defn doc-seq-from-file
   "Returns doc lazy seq from file"
@@ -105,7 +106,7 @@
 
 (defn write-term-postings-mapping-to-files
   "Writes term and postings list to index files
-  
+
   Dictionary file: term\tdocument_frequency
   Postings list file: term\tpost1;post2;"
   [term-postings-mapping]
@@ -129,7 +130,7 @@
   (map (fn [{id :id url :url}] [id url]) doc-seq))
 
 (defn create-indicies-helper
-  "Main function for creating indicies. 
+  "Main function for creating indicies.
    Reads in datafile, tokenizes, sorts, and writes to files"
   [jsonfile]
   (let [docs (doc-seq-from-file jsonfile)
