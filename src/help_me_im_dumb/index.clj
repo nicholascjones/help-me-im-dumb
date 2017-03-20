@@ -23,12 +23,15 @@
 
 (defn term->postings
   [term]
-  (-> (some
-       #(when (.startsWith % term) %)
-       (line-seq (io/reader POSTINGS-LIST-FILENAME)))
-      (s/split #"\t")
-      second
-      (s/split #";")))
+  (let [plist (some
+               #(when (.startsWith % term) %)
+               (line-seq (io/reader POSTINGS-LIST-FILENAME)))]
+    (if (some? plist)
+      (-> plist
+          (s/split #"\t")
+          second
+          (s/split #";"))
+      '())))
 
 (defn create-indicies
   "Main function for creating indicies.
