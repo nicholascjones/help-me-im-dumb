@@ -20,7 +20,9 @@ function create_link_list_item(link) {
 function run_query(q) {
     http_get('/query/' + q, function(data) {
         var result_list = document.getElementById("result-list");
+        var results_count = document.getElementById("results-count");
         links = JSON.parse(data);
+        results_count.textContent = 'Total Results: ' + links.length;
         tags = [];
         result_list.innerHTML = ''
         for (var i = 0; i < links.length; i++) {
