@@ -8,10 +8,10 @@ function http_get(url, callback) {
     xml_http.send(null);
 }
 
-function create_link_list_item(link) {
+function create_link_list_item(doc) {
     var a = document.createElement("a");
-    a.text = link;
-    a.href = link;
+    a.text = doc['title'];
+    a.href = doc['url'];
     var li = document.createElement('li');
     li.appendChild(a);
     return li;
@@ -22,12 +22,12 @@ function run_query(q) {
     http_get('/query/' + q, function(data) {
         var result_list = document.getElementById("result-list");
         var results_count = document.getElementById("results-count");
-        links = JSON.parse(data);
-        results_count.textContent = 'Total Results: ' + links.length;
+        docs = JSON.parse(data);
+        results_count.textContent = 'Total Results: ' + docs.length;
         tags = [];
         result_list.innerHTML = ''
-        for (var i = 0; i < links.length; i++) {
-            var tag = create_link_list_item(links[i]);
+        for (var i = 0; i < docs.length; i++) {
+            var tag = create_link_list_item(docs[i]);
             result_list.appendChild(tag);
         }
         console.log('Query for ' + q + 'returned.');

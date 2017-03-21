@@ -9,7 +9,7 @@
 (def MAPDB-FILENAME "resources/mapdb.db")
 (def POSTINGS-LIST-DB "term-postings-mapping")
 (def URL-MAPPING-FILENAME "resources/url-mapping.txt")
-(def URL-MAPPING-DB "url-mapping")
+(def DOCID-DOC-MAPPING-DB "docid-doc-mapping")
 
 (declare create-indicies-helper read-in-dictionary)
 
@@ -18,10 +18,10 @@
   (def DICTIONARY (read-in-dictionary))
   (def MAPDB (spicerack/open-database MAPDB-FILENAME)))
 
-(defn docid->url
+(defn docid->doc
   [docid]
-  (let [url-map (spicerack/open-hashmap MAPDB URL-MAPPING-DB)]
-    (get url-map docid)))
+  (let [docid-doc-map (spicerack/open-hashmap MAPDB DOCID-DOC-MAPPING-DB)]
+    (get docid-doc-map docid)))
 
 (defn term->postings
   [term]
@@ -60,7 +60,7 @@
         url (doc "url")
         comments (doc "comments")
         comment-string (concat (map #(get % "text") comments))]
-    {:url url :title (sanitize-tokens title) :text (sanitize-tokens (apply str body " " comment-string))}))
+    {:url url :title title :text (apply str body " " comment-string)}))
 
 (defn doc-seq-from-file
   "Returns doc lazy seq from file"
@@ -77,8 +77,8 @@
   (apply
    concat
    (map
-    (fn [{id :id tokens :title}]
-      (map #(vector id %) tokens))
+    (fn [{id :id title :title}]
+      (map #(vector id %) (sanitize-tokens title)))
     doc-seq)))
 
 (defn sort-id-token-pairs
@@ -118,16 +118,16 @@
                 (str term "\t" (count (distinct postings)) "\n"))
         (spicerack/put! postings-list-map term postings)))))
 
-(defn write-url-mapping-to-file
-  [url-seq]
+(defn write-docid-doc-mapping-to-file
+  [docid-doc-seq]
   (with-open [db (spicerack/open-database MAPDB-FILENAME)]
-    (let [url-map (spicerack/open-hashmap db URL-MAPPING-DB)]
-     (doseq [[doc-id url] url-seq]
-       (spicerack/put! url-map doc-id url)))))
+    (let [docid-doc-map (spicerack/open-hashmap db DOCID-DOC-MAPPING-DB)]
+     (doseq [[doc-id doc] docid-doc-seq]
+       (spicerack/put! docid-doc-map doc-id doc)))))
 
-(defn create-url-seq
+(defn create-docid-doc-seq
   [doc-seq]
-  (map (fn [{id :id url :url}] [id url]) doc-seq))
+  (map (fn [{id :id url :url title :title}] [id {:url url :title title}]) doc-seq))
 
 (defn create-indicies-helper
   "Main function for creating indicies.
@@ -136,8 +136,8 @@
   (io/delete-file MAPDB-FILENAME true)
   (let [docs (doc-seq-from-file jsonfile)
         token-seq (token-seq-from-docs docs)
-        url-seq (create-url-seq docs)]
+        docid-doc-seq (create-docid-doc-seq docs)]
     (-> token-seq ;; Write term postings to file
         create-sorted-term-postings-mapping
         write-term-postings-mapping-to-files)
-    (write-url-mapping-to-file url-seq)))
+    (write-docid-doc-mapping-to-file docid-doc-seq)))
