@@ -29,8 +29,8 @@
 (defn run-server
   "Runs jetty server on given port"
   [port]
-  (index/initialize-index)
   (jetty/run-jetty #'app {:port port :join? false}))
 
 ;; (def server (run-server 5000))
+
 

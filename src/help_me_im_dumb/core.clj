@@ -20,5 +20,8 @@
     (do
       (index/create-indicies (second args))
       (println "Index created successfully!"))
-    (= "-server" (first args)) (run-server (read-string (second args)))
+    (= "-server" (first args))
+    (do
+      (index/initialize-index)
+      (run-server (read-string (second args))))
     :else (usage)))
