@@ -133,7 +133,7 @@
   "Main function for creating indicies.
    Reads in datafile, tokenizes, sorts, and writes to files"
   [jsonfile]
-  (io/delete-file MAPDB-FILENAME)
+  (io/delete-file MAPDB-FILENAME true)
   (let [docs (doc-seq-from-file jsonfile)
         token-seq (token-seq-from-docs docs)
         url-seq (create-url-seq docs)]
