@@ -11,7 +11,25 @@ h2 {
 }
 
 #result-list {
-    font-family: 'Raleway', sans-serif;
+    font-family: 'Playfair Display', sans-serif;
+    list-style: none;
+}
+
+#result-list li {
+    padding-bottom: 20px;
+    font-size: 23px;
+}
+
+#result-list a {
+    text-decoration: none;
+    color: black;
+    transition: background 0.1s linear;
+    border-radius: 10px;
+}
+
+#result-list a:hover {
+    background-color: #e3dfdf;
+    border-radius: 10px;
 }
 
 div.topdiv {
@@ -19,6 +37,7 @@ div.topdiv {
     height: 150px;
     padding-top: 5px;
     background-color: #353535;
+    border-radius: 10px;
 }
 
 #title-banner {
