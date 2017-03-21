@@ -151,3 +151,4 @@
         create-sorted-term-postings-mapping
         write-term-postings-mapping-to-files)
     (write-docid-doc-mapping-to-file docid-doc-seq)))
+

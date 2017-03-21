@@ -5,16 +5,17 @@
 
 (defn query->results
   [matcher q limit]
-  (map index/docid->doc (take limit (matcher q))))
+  (map index/docid->doc (take limit (matcher (index/sanitize-tokens q)))))
 
 (defn boolean-query-matcher
   "Super dumb query matcher. Returns all docs with all words"
-  [q]
-  (apply
-   clojure.set/intersection
-   (map
-    #(into #{} (index/term->postings %))
-    (clojure.string/split q #"\s+"))))
-
+  [q-tokens]
+  (if (empty? q-tokens)
+    ()
+    (apply
+     clojure.set/intersection
+     (map
+      #(into #{} (index/term->postings %))
+      q-tokens))))
 
 (def bquery->results (partial query->results boolean-query-matcher))
