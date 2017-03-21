@@ -1,52 +1,24 @@
-
 body {
    margin: 0;
    padding: 0;
+    font-family: Arial, "Sans-serif";
 }
 
 div.topdiv {
-    position: fixed;
     width: 100%;
     height: 150px;
     background-color: #353535;
-
-
 }
-h1 {
-    font-szie: 20pt;
+
+#title-banner {
     font-style: normal;
-    font-family: Arial, "Sans-serif";
     color: white;
-
 }
 
-h2 {
-    font-szie: 14pt;
-    font-style: normal;
-    font-family: Arial, "Sans-serif";
-    color: black;
-
-}
-
-span {
-    display: inline-block;
+#query-label {
     color: white;
-
 }
 
 .txt-center {
     text-align: center;
-
 }
-
-
-.wrapper {
-    margin: 30px auto;
-    text-align: center;
-}
-
-input[type="text"] {
-  display: inline-block;
-  margin: auto;
-}
-
