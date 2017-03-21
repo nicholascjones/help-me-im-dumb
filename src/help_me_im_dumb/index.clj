@@ -11,6 +11,16 @@
 (def URL-MAPPING-FILENAME "resources/url-mapping.txt")
 (def DOCID-DOC-MAPPING-DB "docid-doc-mapping")
 
+(def STOP-WORDS
+  "List of words to ignore"
+  " source: http://www.wordfrequency.info/free.asp?s=y "
+  #{"the" "be" "and" "of" "a" "in" "to" "have" "it" "i" "that" "for" "you" "he" "she" "with" "on" "do" "say" "this" "they" "at" "but" "we" "is" "his" "hers"})
+
+(defn not-stop-word?
+  [w]
+  "Returns boolean based on is/isn't stop word"
+  (if (STOP-WORDS w) false true))
+
 (declare create-indicies-helper read-in-dictionary)
 
 (defn initialize-index
@@ -43,7 +53,7 @@
 
 (defn normalize-tokens
   [tokens]
-  (map s/lower-case tokens))
+  (filter not-stop-word? (map s/lower-case tokens)))
 
 (defn sanitize-tokens
   [tokens]
