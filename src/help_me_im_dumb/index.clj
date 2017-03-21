@@ -11,10 +11,10 @@
 (def URL-MAPPING-FILENAME "resources/url-mapping.txt")
 (def DOCID-DOC-MAPPING-DB "docid-doc-mapping")
 
+; List of words to ignore
+; source: http://www.wordfrequency.info/free.asp?s=y
 (def STOP-WORDS
-  "List of words to ignore"
-  " source: http://www.wordfrequency.info/free.asp?s=y "
-  #{"the" "be" "and" "of" "a" "in" "to" "have" "it" "i" "that" "for" "you" "he" "she" "with" "on" "do" "say" "this" "they" "at" "but" "we" "is" "his" "hers"})
+  #{"the" "am" "be" "and" "of" "a" "in" "to" "have" "it" "i" "that" "for" "you" "he" "she" "with" "on" "do" "say" "this" "they" "at" "but" "we" "is" "his" "hers"})
 
 (defn not-stop-word?
   [w]
