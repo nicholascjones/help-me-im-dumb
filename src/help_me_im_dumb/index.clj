@@ -16,7 +16,7 @@
 (defn initialize-index
   []
   (def DICTIONARY (read-in-dictionary))
-  (def MAPDB (spicerack/open-database MAPDB-FILENAME)))
+  (def MAPDB (spicerack/open-database MAPDB-FILENAME :read-only? true)))
 
 (defn docid->doc
   [docid]
