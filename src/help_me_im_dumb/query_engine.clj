@@ -20,8 +20,29 @@
 
 (def bquery->results (partial query->results boolean-query-matcher))
 
-(def tf-score-placeholder #(or 1 %1 %2))
-(def idf-score-placeholder #(or 1 %))
+(defn idf-score
+  "for a given docs and a term find idf"
+  [term]
+  (/
+    (float index/TOTAL-DOCS)
+    (float (if (index/DICTIONARY (read-string term)) (index/DICTIONARY (read-string term)) 1))
+    ))
+
+(index/initialize-index)
+(index/DICTIONARY "run")
+(idf-score "run")
+
+(index/DICTIONARY "water")
+(idf-score "water")
+
+(defn tf-score
+  "given 1 doc and 1 term find term freq"
+  [term docid]
+  (count
+    (re-seq(re-pattern term)
+            (get (index/docid->doc docid) :title))))
+
+
 
 (defn tfidf-scores
   [docids term]
@@ -29,7 +50,7 @@
    (fn [docid]
      (vector
       docid
-      (* (tf-score-placeholder term docid) (idf-score-placeholder term))))
+      (* (tf-score term docid) (idf-score term))))
    (distinct docids)))
 
 (defn tfidf-scores-for-query
@@ -62,22 +83,4 @@
              #(into #{} (index/term->postings %))
              (clojure.string/split q #"\s+")
              ))))
-
-
-(defn idf-score
-  "for a given docs and a term find idf"
-  [term docs]
-  (/
-    (float (count docs))
-    (float (count (index/term->postings term)))
-    )
-  )
-
-
-(defn tf-score
-  "given 1 doc and 1 term find term freq"
-  [term docid]
-  (count
-    (re-seq(re-pattern term)
-            (get (index/docid->doc docid) :title))))
 
