@@ -30,9 +30,7 @@
 (defn tf-score
   "given 1 doc and 1 term find term freq"
   [term docid]
-  (count
-    (re-seq(re-pattern term)
-            (get (index/docid->doc docid) :title))))
+  1)
 
 (defn tfidf-scores
   [docids term]
