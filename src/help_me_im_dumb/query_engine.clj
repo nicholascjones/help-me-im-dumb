@@ -23,17 +23,12 @@
 (defn idf-score
   "for a given docs and a term find idf"
   [term]
-  (/
-    (float index/TOTAL-DOCS)
-    (float (if (index/DICTIONARY (read-string term)) (index/DICTIONARY (read-string term)) 1))
-    ))
+  (Math/log
+    (/
+      (float index/TOTAL-DOCS)
+      (float (if (count (index/term->postings term)) (count (index/term->postings term)) 1))
+      )))
 
-(index/initialize-index)
-(index/DICTIONARY "run")
-(idf-score "run")
-
-(index/DICTIONARY "water")
-(idf-score "water")
 
 (defn tf-score
   "given 1 doc and 1 term find term freq"
