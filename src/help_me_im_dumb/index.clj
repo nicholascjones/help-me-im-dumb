@@ -10,6 +10,7 @@
 (def POSTINGS-LIST-DB "term-postings-mapping")
 (def URL-MAPPING-FILENAME "resources/url-mapping.txt")
 (def DOCID-DOC-MAPPING-DB "docid-doc-mapping")
+(def TOTAL-DOCS-FILENAME "resources/total-docs")
 
 ; List of words to ignore
 ; source: http://www.wordfrequency.info/free.asp?s=y
@@ -26,6 +27,7 @@
 (defn initialize-index
   []
   (def DICTIONARY (read-in-dictionary))
+  (def TOTAL-DOCS (read-string (slurp TOTAL-DOCS-FILENAME)))
   (def MAPDB (spicerack/open-database MAPDB-FILENAME :read-only? true)))
 
 (defn docid->doc
@@ -132,8 +134,9 @@
   [docid-doc-seq]
   (with-open [db (spicerack/open-database MAPDB-FILENAME)]
     (let [docid-doc-map (spicerack/open-hashmap db DOCID-DOC-MAPPING-DB)]
-     (doseq [[doc-id doc] docid-doc-seq]
-       (spicerack/put! docid-doc-map doc-id doc)))))
+      (spit TOTAL-DOCS-FILENAME (count docid-doc-seq))
+      (doseq [[doc-id doc] docid-doc-seq]
+        (spicerack/put! docid-doc-map doc-id doc)))))
 
 (defn create-docid-doc-seq
   [doc-seq]
