@@ -1,7 +1,7 @@
 (ns help-me-im-dumb.query-engine
   (:require [help-me-im-dumb.index :as index]))
 
-(declare boolean-query-matcher)
+(declare boolean-query-matcher tifdf-matcher-helper)
 
 (defn query->results
   [matcher q limit]
@@ -20,7 +20,38 @@
 
 (def bquery->results (partial query->results boolean-query-matcher))
 
+(def tf-score-placeholder #(or 1 %1 %2))
+(def idf-score-placeholder #(or 1 %))
 
+(defn tfidf-scores
+  [docids term]
+  (map
+   (fn [docid]
+     (vector
+      docid
+      (* (tf-score-placeholder term docid) (idf-score-placeholder term))))
+   (distinct docids)))
+
+(defn tfidf-scores-for-query
+  [q-tokens]
+  (apply
+   concat
+   (map tfidf-scores (map index/term->postings q-tokens) q-tokens)))
+
+(defn tfidf-matcher
+  "Returns results sorted by tfidf"
+  [q-tokens]
+  (map
+   first
+   (sort-by
+    #(* -1 (second %))
+    (reduce
+     (fn [m [docid score]]
+       (update m docid #(+ score (or % 0))))
+     {}
+     (tfidf-scores-for-query q-tokens)))))
+
+(def tfidfquery->results (partial query->results tfidf-matcher))
 
 (defn list-all-docs
   "for a given query list all documents that at least one appears in"

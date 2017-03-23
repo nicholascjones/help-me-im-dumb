@@ -17,10 +17,14 @@
   [q]
   (json/write-str (query/bquery->results q RESULTS-LIMIT)))
 
+(defn tfidf-query-results
+  [q]
+  (json/write-str (query/tfidfquery->results q RESULTS-LIMIT)))
+
 (defroutes app-routes
   (route/resources "/")
   (GET "/" [] (read-template "templates/index.html"))
-  (GET "/query/:q" [q] (boolean-query-results q))
+  (GET "/query/:q" [q] (tfidf-query-results q))
   (route/not-found "Not Found"))
 
 (def app
