@@ -19,3 +19,5 @@ Once the server is run, users can open the page in the web browser (either on lo
 In order to allow help-me-im-dumb to effectively search through the reddit posts, an index must be made for the search. The effectiveness of the search is increased with a better index. When it comes to Clojure's index creation, Clojure does it concurrently to help speed up the process.
 
 Clojure's handling of variables make sure that no side effects will occur for unintended variables when functions run. Clojure is very explicit in controlling which variables can be modified. This control is necessary for the index creation and to get the results from the search to the html page.
+
+Given that Clojue compiles to Java, HMID also reaps many of the benefits of the Java programming ecosystem. Notably, by making use of the Java Virtual Machine, HMID is portable and will run well on multiple platforms. Additionally, we utlized an on-disk Java btree library that allowed for a highly efficient implementation of our application without having to reinvent the wheel in our development.
