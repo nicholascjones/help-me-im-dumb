@@ -25,15 +25,7 @@
   [term]
   (/
     (float index/TOTAL-DOCS)
-    (float (if (index/DICTIONARY (read-string term)) (index/DICTIONARY (read-string term)) 1))
-    ))
-
-(index/initialize-index)
-(index/DICTIONARY "run")
-(idf-score "run")
-
-(index/DICTIONARY "water")
-(idf-score "water")
+    (float (read-string (index/DICTIONARY term)))))
 
 (defn tf-score
   "given 1 doc and 1 term find term freq"
@@ -41,8 +33,6 @@
   (count
     (re-seq(re-pattern term)
             (get (index/docid->doc docid) :title))))
-
-
 
 (defn tfidf-scores
   [docids term]
